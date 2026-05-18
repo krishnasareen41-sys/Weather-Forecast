@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Weather Predictor</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <nav class="app-navbar glass-panel">
+        <div class="nav-brand">
+            <i class="fas fa-cloud-sun-rain text-primary"></i> Weather Predictor
+        </div>
+        
+        <!-- Symmetrical Nav Search Bar for Top-Level Search -->
+        <div class="nav-search-container">
+            <i class="fas fa-search" style="color: #64748b; font-size: 0.9rem;"></i>
+            <input type="text" id="nav-search-input" placeholder="Search state, city or country..." style="flex: 1; background: transparent; border: none; outline: none; color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 0.9rem; padding: 0.2rem 0;" autocomplete="off">
+            <button id="nav-search-btn" class="primary-btn" style="padding: 0.4rem 1.2rem; border-radius: 1.5rem; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.3rem;"><i class="fas fa-plane"></i> Go</button>
+        </div>
+
+        <div class="controls-group">
+            <button id="unit-toggle" class="glass-toggle"><strong>°C</strong> | °F</button>
+            <button id="refresh-btn" class="icon-btn"><i class="fas fa-sync-alt"></i></button>
+        </div>
+    </nav>
+
+    <!-- Trip Planner Landing / Hero Section -->
+    <header id="trip-hero" class="trip-hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Plan your next journey with <span class="text-primary">AI</span></h1>
+            <p class="hero-subtitle">Enter a destination to generate a complete travel itinerary, discover local gems, and prepare for the weather.</p>
+            
+            <div class="trip-search-box glass-panel">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <input type="text" id="search-input" placeholder="Where do you want to go? (e.g., Tokyo, Paris)" autocomplete="off">
+                    <ul class="history-dropdown glass-panel hidden" id="history-dropdown"></ul>
+                </div>
+                <button id="search-btn" class="primary-btn"><i class="fas fa-cloud-sun-rain"></i> Predict Weather</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Trending Destinations -->
+    <section id="trending-section" class="trending-section">
+        <h3><i class="fas fa-fire text-primary"></i> Trending Destinations</h3>
+        <div class="trending-grid">
+            <div class="trending-card" onclick="document.getElementById('search-input').value='Kyoto'; document.getElementById('search-btn').click();">
+                <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop&q=80" alt="Kyoto">
+                <div class="trending-info">
+                    <h4>Kyoto, Japan</h4>
+                    <p>Culture & Temples</p>
+                </div>
+            </div>
+            <div class="trending-card" onclick="document.getElementById('search-input').value='Santorini'; document.getElementById('search-btn').click();">
+                <img src="https://picsum.photos/800/600?random=santorini" alt="Santorini">
+                <div class="trending-info">
+                    <h4>Santorini, Greece</h4>
+                    <p>Beaches & Views</p>
+                </div>
+            </div>
+            <div class="trending-card" onclick="document.getElementById('search-input').value='Banff'; document.getElementById('search-btn').click();">
+                <img src="https://picsum.photos/800/600?random=banff" alt="Banff">
+                <div class="trending-info">
+                    <h4>Banff, Canada</h4>
+                    <p>Mountains & Lakes</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="app-container">
+        <div id="loader" class="loader-container hidden">
+            <div class="modern-spinner"></div>
+            <p>Crafting your perfect trip and fetching weather data...</p>
+        </div>
+        
+        <div id="error-msg" class="alert-box hidden" role="alert"></div>
+
+        <article id="weather-dashboard" class="dashboard hidden">
+            <!-- Full Width Trip Planning Section (City description takes whole full area!) -->
+            <section class="trip-planning-section glass-panel">
+                <div class="destination-hero">
+                    <h2 id="city-name" class="trip-dest-title">--</h2>
+                    <p id="city-summary-text" class="trip-dest-desc">Loading city information...</p>
+                </div>
+                
+                <div class="trip-grid">
+                    <div class="trip-card">
+                        <h4><i class="fas fa-hotel"></i> Recommended Stay</h4>
+                        <ul id="hotel-list" class="places-list">
+                            <li><i class="fas fa-spinner fa-spin"></i> Finding hotels...</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="trip-card">
+                        <h4><i class="fas fa-camera"></i> Top Attractions</h4>
+                        <ul id="attraction-list" class="places-list">
+                            <li><i class="fas fa-spinner fa-spin"></i> Finding attractions...</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Middle Section: Travel Weather Context, Warnings & Trip Map side-by-side (Map on Left: 70%, Weather Stack on Right: 30%) -->
+            <div class="grid-map-weather mt-4">
+                <!-- Trip Map & Logistics Column (Left) -->
+                <section class="map-section glass-panel" style="margin-top: 0; display: flex; flex-direction: column;">
+                    <h3><i class="fas fa-map-marked-alt"></i> Trip Map & Logistics</h3>
+                    <div id="weather-map" style="flex: 1; min-height: 380px; width: 100%; border-radius: 1.2rem;"></div>
+                </section>
+
+                <!-- Weather Context & Travel Warnings Column (Right) -->
+                <div class="weather-column" style="display: flex; flex-direction: column; gap: 1.5rem; justify-content: stretch;">
+                    <section class="hero-weather glass-panel" style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin-top: 0; min-height: 250px;">
+                        <h3 class="context-title" style="margin-bottom: 0.5rem;"><i class="fas fa-cloud-sun"></i> Travel Weather Context</h3>
+                        <div class="temp-display">
+                            <div class="animated-icon-container">
+                                <img id="weather-icon" src="" alt="weather icon">
+                            </div>
+                            <div class="temp-data">
+                                <h2 id="temperature">--</h2>
+                                <span id="description" class="badge">--</span>
+                            </div>
+                        </div>
+                        <time id="date-time">--</time>
+                        <div id="extreme-indicator" class="extreme-badge hidden"></div>
+                    </section>
+
+                    <!-- Weather Alerts / Travel Warnings Section -->
+                    <div id="alerts-section" class="alerts-panel glass-panel hidden" style="margin-top: 0;">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Travel Warnings</h3>
+                        <div id="alerts-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lower Section: Packing & Trip Advice on the Left; Symmetrical Metrics Columns + 24-Hour Forecast stacked on the Right -->
+            <div class="grid-2-col mt-4">
+                <!-- Packing & Trip Advice (Left Column) -->
+                <section class="suggestions-section glass-panel" style="margin-top: 0; display: flex; flex-direction: column; justify-content: space-between;">
+                    <h3><i class="fas fa-suitcase"></i> Packing & Trip Advice</h3>
+                    <div id="suggestions-content" class="suggestions-content" style="flex: 1;">
+                        <div class="suggestion-item">
+                            <i class="fas fa-tshirt"></i>
+                            <span id="clothing-suggestion">Loading...</span>
+                        </div>
+                        <div class="suggestion-item">
+                            <i class="fas fa-umbrella"></i>
+                            <span id="accessory-suggestion">Loading...</span>
+                        </div>
+                        <div class="suggestion-item">
+                            <i class="fas fa-shoe-prints"></i>
+                            <span id="activity-suggestion">Loading...</span>
+                        </div>
+                        <div class="suggestion-item">
+                            <i class="fas fa-heartbeat"></i>
+                            <span id="health-suggestion">Loading...</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Column containing Symmetrical Weather Metrics and 24-Hour Forecast below them -->
+                <div class="right-weather-stack" style="display: flex; flex-direction: column; gap: 1.5rem; justify-content: stretch;">
+                    <!-- Symmetrical Weather Metrics Columns Row -->
+                    <section class="glass-panel" style="margin-top: 0; padding: 1.2rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; box-sizing: border-box; width: 100%;">
+                        <div class="metric-card" style="padding: 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; width: 100%; box-sizing: border-box;">
+                            <i class="fas fa-wind" style="font-size: 1.5rem; color: #60a5fa; background: rgba(59, 130, 246, 0.1); padding: 0.5rem; border-radius: 0.8rem;"></i>
+                            <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500; text-transform: uppercase;">Wind</span>
+                            <strong id="wind-speed" style="font-size: 1.1rem; color: #38bdf8; font-weight: 700;">--</strong>
+                        </div>
+                        <div class="metric-card" style="padding: 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; width: 100%; box-sizing: border-box;">
+                            <i class="fas fa-droplet" style="font-size: 1.5rem; color: #60a5fa; background: rgba(59, 130, 246, 0.1); padding: 0.5rem; border-radius: 0.8rem;"></i>
+                            <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500; text-transform: uppercase;">Humidity</span>
+                            <strong id="humidity" style="font-size: 1.1rem; color: #38bdf8; font-weight: 700;">--</strong>
+                        </div>
+                        <div class="metric-card" style="padding: 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; width: 100%; box-sizing: border-box;">
+                            <i class="fas fa-lungs" style="font-size: 1.5rem; color: #60a5fa; background: rgba(59, 130, 246, 0.1); padding: 0.5rem; border-radius: 0.8rem;"></i>
+                            <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500; text-transform: uppercase;">Air Quality</span>
+                            <strong id="aqi" style="font-size: 1.1rem; color: #38bdf8; font-weight: 700; white-space: nowrap;">--</strong>
+                        </div>
+                        <div class="metric-card" style="padding: 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; width: 100%; box-sizing: border-box;">
+                            <i class="fas fa-temperature-half" style="font-size: 1.5rem; color: #60a5fa; background: rgba(59, 130, 246, 0.1); padding: 0.5rem; border-radius: 0.8rem;"></i>
+                            <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500; text-transform: uppercase;">Feels Like</span>
+                            <strong id="feels-like" style="font-size: 1.1rem; color: #38bdf8; font-weight: 700;">--</strong>
+                        </div>
+                    </section>
+
+                    <!-- 24-Hour Forecast below the metrics -->
+                    <section class="hourly-section glass-panel" style="margin-top: 0; display: flex; flex-direction: column; justify-content: space-between; flex: 1;">
+                        <h3><i class="far fa-clock"></i> 24-Hour Forecast <span id="hourly-summary" class="small-badge"></span></h3>
+                        <div class="hourly-scroll" id="hourly-container" style="flex: 1; display: flex; align-items: center;"></div>
+                    </section>
+                </div>
+            </div>
+
+            <div class="sun-progress glass-panel mt-4">
+                <i class="fas fa-sunrise"></i>
+                <p>Sun progress bar</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="sun-progress-bar">
+                    </div>
+                </div>
+                <i class="fas fa-sunset"></i>
+            </div>
+
+
+
+            <!-- Bottom Analytics -->
+            <div class="grid-2-col mt-6">
+                <section class="chart-section glass-panel">
+                    <h3><i class="fas fa-chart-line"></i> Temperature & Rain Trends</h3>
+                    <div class="chart-container">
+                        <canvas id="weatherChart"></canvas>
+                    </div>
+                    <div class="stats-summary" id="trend-stats"></div>
+                </section>
+
+                <section class="forecast-section glass-panel">
+                    <h3><i class="far fa-calendar-alt"></i> 5-Day Outlook</h3>
+                    <div class="forecast-track" id="forecast-container"></div>
+                    <div class="week-summary" id="week-summary"></div>
+                </section>
+            </div>
+
+            <!-- Analytics Dashboard -->
+            <section class="analytics-dashboard glass-panel">
+                <h3><i class="fas fa-chart-bar"></i> Weather Analytics</h3>
+                <div class="analytics-grid">
+                    <div class="analytic-card">
+                        <span>Temperature Range</span>
+                        <strong id="temp-range">--</strong>
+                    </div>
+                    <div class="analytic-card">
+                        <span>Rain Probability</span>
+                        <strong id="rain-probability">--</strong>
+                    </div>
+                    <div class="analytic-card">
+                        <span>Comfort Index</span>
+                        <strong id="comfort-index">--</strong>
+                    </div>
+                    <div class="analytic-card">
+                        <span>Outdoor Score</span>
+                        <strong id="outdoor-score">--</strong>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </main>
+</body>
+</html>
