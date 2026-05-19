@@ -512,18 +512,6 @@ h3 i {
     margin: 1rem 0;
 }
 
-/* Extreme Weather Badge */
-.extreme-badge {
-    background: linear-gradient(135deg, rgba(239,68,68,0.25), rgba(239,68,68,0.1));
-    border: 1px solid rgba(239,68,68,0.5);
-    color: #fca5a5;
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-top: 0.5rem;
-    display: inline-block;
-}
 
 /* Hero Content Wrapper */
 .hero-content {
@@ -860,6 +848,49 @@ h3 i {
     border-radius: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
+.quick-actions {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+.action-btn {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.action-btn:hover {
+    background: rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+.share-btn {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+.share-btn:hover {
+    background: rgba(16, 185, 129, 0.3);
+}
+.local-time-badge {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.3rem 0.8rem;
+    border-radius: 1rem;
+    display: inline-block;
+}
 .trip-card h4 {
     color: #60a5fa;
     font-size: 1.1rem;
@@ -1140,12 +1171,7 @@ h3 i {
         align-items: center;
         text-align: center;
     }
-    .extreme-badge {
-        position: relative;
-        top: 0; right: 0;
-        margin-top: 10px;
-        display: inline-block;
-    }
+
     .trip-grid {
         grid-template-columns: 1fr;
     }

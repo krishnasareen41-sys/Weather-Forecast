@@ -349,7 +349,6 @@ function getWindDirection(degrees) {
 function checkExtremeWeather(weather, temp, windSpeed, humidity) {
     const extremes = [];
     if (weather === 'Thunderstorm') extremes.push('⚡ Thunderstorm Warning');
-    if (temp > 35) extremes.push('🔥 Extreme Heat');
     if (temp < -10) extremes.push('❄️ Extreme Cold');
     if (windSpeed > 20) extremes.push('💨 High Wind Warning');
     if (humidity > 90) extremes.push('💧 High Humidity Alert');
@@ -903,6 +902,36 @@ async function fetchAllWeatherData(lat, lon, locationName) {
         if (descElem) descElem.innerText = current.weather[0].description;
         if (iconElem) iconElem.src = getAnimatedIcon(current.weather[0].icon);
         
+        // Local Time Logic
+        const localTimeElem = document.getElementById('local-time');
+        if (localTimeElem && current.timezone !== undefined) {
+            // current.timezone is offset in seconds from UTC. 
+            // Get current UTC time in ms, add the offset in ms.
+            const utcTime = Date.now() + (new Date().getTimezoneOffset() * 60000);
+            const localTimeDate = new Date(utcTime + (current.timezone * 1000));
+            localTimeElem.innerHTML = `<i class="far fa-clock"></i> Local Time: ${localTimeDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', weekday: 'short' })}`;
+            localTimeElem.classList.remove('hidden');
+        }
+        
+        // Quick Actions Logic
+        const btnFlights = document.getElementById('btn-flights');
+        const btnHotels = document.getElementById('btn-hotels');
+        const btnShare = document.getElementById('btn-share');
+        
+        if (btnFlights) btnFlights.onclick = () => window.open(`https://www.google.com/travel/flights?q=flights+to+${encodeURIComponent(locationName)}`, '_blank');
+        if (btnHotels) btnHotels.onclick = () => window.open(`https://www.google.com/travel/hotels?q=hotels+in+${encodeURIComponent(locationName)}`, '_blank');
+        if (btnShare) {
+            btnShare.onclick = () => {
+                const textToShare = `Check out my trip to ${locationName}! The weather is currently ${Math.round(current.main.temp)}${unitSym} and ${current.weather[0].description}.`;
+                navigator.clipboard.writeText(textToShare).then(() => {
+                    const originalHtml = btnShare.innerHTML;
+                    btnShare.innerHTML = `<i class="fas fa-check"></i> Copied!`;
+                    setTimeout(() => btnShare.innerHTML = originalHtml, 2000);
+                }).catch(err => console.error('Error copying text: ', err));
+            };
+        }
+
+        
         // Wind with direction
         const windDir = getWindDirection(current.wind.deg);
         const windSpeedElem = document.getElementById('wind-speed');
@@ -951,15 +980,6 @@ async function fetchAllWeatherData(lat, lon, locationName) {
         
         // Extreme weather check
         const extremes = checkExtremeWeather(current.weather[0].main, current.main.temp, current.wind.speed, current.main.humidity);
-        const extremeIndicator = document.getElementById('extreme-indicator');
-        if (extremeIndicator) {
-            if (extremes.length > 0) {
-                extremeIndicator.innerHTML = extremes[0];
-                extremeIndicator.classList.remove('hidden');
-            } else {
-                extremeIndicator.classList.add('hidden');
-            }
-        }
         
         // Alerts
         const alertsSection = document.getElementById('alerts-section');
@@ -1104,7 +1124,7 @@ function handleSearch() {
     if (query) {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.set('city', query);
-        window.open(currentUrl.toString(), '_blank');
+        window.location.href = currentUrl.toString();
         ui.searchInput.value = '';
     }
     if (ui.historyDropdown) ui.historyDropdown.classList.add('hidden');
@@ -1116,7 +1136,7 @@ function handleNavSearch() {
     if (query) {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.set('city', query);
-        window.open(currentUrl.toString(), '_blank');
+        window.location.href = currentUrl.toString();
         if (navInput) navInput.value = '';
     }
 }
@@ -1166,6 +1186,17 @@ function bindEvents() {
 
 function init() {
     console.log('Initializing Weather Predictor...');
+    
+    // Dynamic Greeting
+    const hour = new Date().getHours();
+    let greeting = "Good Evening";
+    if (hour < 12) greeting = "Good Morning";
+    else if (hour < 18) greeting = "Good Afternoon";
+    
+    const heroTitle = document.querySelector('.hero-title');
+    if (heroTitle) {
+        heroTitle.innerHTML = `${greeting}! Plan your next journey with <span class="text-primary">AI</span>`;
+    }
     
     // Security and UX Gate: Redirect to login page on manual reload/refresh or if unauthorized
     const urlParams = new URLSearchParams(window.location.search);

@@ -94,8 +94,18 @@
             <!-- Full Width Trip Planning Section (City description takes whole full area!) -->
             <section class="trip-planning-section glass-panel">
                 <div class="destination-hero">
-                    <h2 id="city-name" class="trip-dest-title">--</h2>
-                    <p id="city-summary-text" class="trip-dest-desc">Loading city information...</p>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h2 id="city-name" class="trip-dest-title">--</h2>
+                            <p id="local-time" class="local-time-badge hidden"><i class="far fa-clock"></i> Local Time: --</p>
+                        </div>
+                        <div class="quick-actions">
+                            <button id="btn-flights" class="action-btn" aria-label="Find flights"><i class="fas fa-plane-departure"></i> Flights</button>
+                            <button id="btn-hotels" class="action-btn" aria-label="Find hotels"><i class="fas fa-bed"></i> Hotels</button>
+                            <button id="btn-share" class="action-btn share-btn" aria-label="Share itinerary"><i class="fas fa-share-alt"></i> Share</button>
+                        </div>
+                    </div>
+                    <p id="city-summary-text" class="trip-dest-desc" style="margin-top: 1rem;">Loading city information...</p>
                 </div>
                 
                 <div class="trip-grid">
@@ -137,7 +147,6 @@
                             </div>
                         </div>
                         <time id="date-time">--</time>
-                        <div id="extreme-indicator" class="extreme-badge hidden"></div>
                     </section>
 
                     <!-- Weather Alerts / Travel Warnings Section -->
