@@ -77,6 +77,20 @@ def reverse_geocode():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    if not data or not data.get('email') or not data.get('password'):
+        return jsonify({'success': False, 'message': 'Missing credentials'}), 400
+    return jsonify({'success': True, 'message': 'Login successful'})
+
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    if not data or not data.get('name') or not data.get('email') or not data.get('password'):
+        return jsonify({'success': False, 'message': 'Missing fields'}), 400
+    return jsonify({'success': True, 'message': 'Signup successful'})
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"Starting Secure API Proxy Server on port {port}...")

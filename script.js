@@ -713,13 +713,17 @@ function initMap(lat, lon) {
     setTimeout(() => {
         if (state.map && state.mapInitialized) {
             state.map.setView([lat, lon], 10);
+            if (state.mapMarker) {
+                state.mapMarker.setLatLng([lat, lon])
+                    .bindPopup(`📍 ${state.currentCity || 'Your Location'}<br>Current weather: ${document.getElementById('temperature')?.innerText || '--'}`)
+                    .openPopup();
+            }
             return;
         }
         
         try {
             // Force map container to have dimensions
             if (mapDiv.offsetWidth === 0 || mapDiv.offsetHeight === 0) {
-                console.warn('Map container has zero size, retrying...');
                 setTimeout(() => initMap(lat, lon), 100);
                 return;
             }
@@ -731,7 +735,7 @@ function initMap(lat, lon) {
                 maxZoom: 19
             }).addTo(state.map);
             
-            L.marker([lat, lon]).addTo(state.map)
+            state.mapMarker = L.marker([lat, lon]).addTo(state.map)
                 .bindPopup(`📍 ${state.currentCity || 'Your Location'}<br>Current weather: ${document.getElementById('temperature')?.innerText || '--'}`)
                 .openPopup();
             
@@ -1014,12 +1018,6 @@ async function fetchAllWeatherData(lat, lon, locationName) {
         renderForecast(forecast.list, unitSym);
         renderChart(forecast.list, unitSym);
         
-        // Initialize map after data is loaded
-        initMap(lat, lon);
-        
-        // Fetch Trip Planning Data asynchronously
-        fetchTripData(lat, lon, locationName);
-        
         // Hide Hero and Trending sections when dashboard is shown
         const tripHero = document.getElementById('trip-hero');
         const trendingSection = document.getElementById('trending-section');
@@ -1027,6 +1025,12 @@ async function fetchAllWeatherData(lat, lon, locationName) {
         if (trendingSection) trendingSection.classList.add('hidden');
         
         hideLoader();
+
+        // Initialize map after data is loaded and dashboard is visible
+        initMap(lat, lon);
+        
+        // Fetch Trip Planning Data asynchronously
+        fetchTripData(lat, lon, locationName);
     } catch (err) {
         console.error('Error fetching weather data:', err);
         showError('Unable to fetch weather data. Please check your connection and try again.');

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Weather Predictor</title>
+    <link rel="icon" href="data:,">
     
     <style>
         /* === CSS Styling === */
@@ -304,7 +305,9 @@
         tabSignup.addEventListener('click', () => switchTab(true));
 
         // Use standard root relative url or local flask backend
-        const BASE_URL = 'http://localhost:5000/api';
+        const BASE_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+            ? 'http://localhost:5000/api'
+            : 'https://weather-predictor-proxy.onrender.com/api';
 
         // Handle Login
         formLogin.addEventListener('submit', async (e) => {
