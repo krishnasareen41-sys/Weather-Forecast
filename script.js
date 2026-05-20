@@ -3,9 +3,7 @@ function getApiKey() {
     return localStorage.getItem('owm_api_key') || API_KEY;
 }
 
-const PROXY_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
-    ? 'http://localhost:5000/api'
-    : 'https://weather-predictor-proxy.onrender.com/api'; // Replace with deployed Render/Vercel URL
+const PROXY_URL = `${window.location.origin}/api`;
 
 const CURRENT_WEATHER_URL = 'https://api.openweathermap.org/data/2.5/weather';
 const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
