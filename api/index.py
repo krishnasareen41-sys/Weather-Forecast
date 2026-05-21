@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import serverless_wsgi
 import os
 import requests
 from flask_cors import CORS
@@ -82,5 +83,4 @@ def health():
 
 # Vercel will call this entry point
 def handler(event, context):
-    return app(event, context)
-
+    return serverless_wsgi.handle(app, event, context)

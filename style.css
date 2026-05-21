@@ -1247,8 +1247,6 @@ h3 i {
 }
 
 /* Controls group (unit toggle & refresh) */
-/* Duplicate input styling removed – retained earlier definition */
-
 .controls-group {
     display: flex;
     align-items: center;
@@ -1260,7 +1258,7 @@ h3 i {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.12);
     border-radius: 1.2rem;
-    padding: 0.4rem 0.8rem;
+    padding: 0 0.8rem;
     color: #fff;
     font-weight: 500;
     cursor: pointer;
@@ -1280,19 +1278,6 @@ h3 i {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(59, 130, 246, 0.4);
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
-    @media (max-width: 600px) {
-        .nav-search-container {
-            width: 100% !important;
-            margin: 0 !important;
-            max-width: 100% !important;
-        }
-        .nav-search-container .primary-btn {
-            flex-shrink: 0;
-        }
-        .controls-group {
-            margin-left: 0.2rem;
-        }
-    }
 }
 @media (max-width: 768px) {
     .app-navbar {
