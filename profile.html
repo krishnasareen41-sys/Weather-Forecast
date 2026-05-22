@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile – Weather Predictor</title>
+    <link rel="icon" href="data:," />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0f1e, #1a202c);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .profile-card {
+            background: rgba(15, 25, 45, 0.6);
+            backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 24px;
+            padding: 2rem 2.5rem;
+            width: 380px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p {
+            margin: 0.5rem 0 1.5rem;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.85);
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.9rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239,68,68,0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-card" id="profile-card">
+        <h1>Welcome</h1>
+        <p id="email-display">Loading…</p>
+        <button class="btn" id="logout-btn">Log Out</button>
+    </div>
+    <script>
+        // Auth guard – redirect to login if no email stored
+        const email = sessionStorage.getItem('user_email');
+        if (!email) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('email-display').textContent = email;
+        }
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

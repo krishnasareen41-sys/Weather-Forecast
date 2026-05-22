@@ -1212,7 +1212,7 @@ function init() {
             console.log('Reload or unauthorized access detected. Redirecting to login gateway...');
             sessionStorage.removeItem('auth_success');
             sessionStorage.removeItem('index_loaded');
-            window.location.replace('start.html');
+            window.location.replace('index.html');
             return;
         }
         

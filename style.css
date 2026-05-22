@@ -1220,10 +1220,38 @@ h3 i {
     overflow-x: hidden;
 }
 
+/* mobile adjustment */
+@media (max-width: 480px) {
+    .nav-search-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.8rem;
+    }
+    .nav-search-container input {
+        flex: 1 1 60%;
+        width: auto;
+        margin: 0;
+    }
+    .nav-search-container .primary-btn {
+        flex: 0 0 auto;
+        width: auto;
+        margin: 0;
+    }
+    .controls-group {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+        margin-left: 0;
+    }
+}
+
 /* Input expands and stays on one line */
 .nav-search-container input {
     flex: 1 1 auto;
     min-width: 0;
+    width: 100%;
+    margin-bottom: 0.4rem;
     color: #fff;
     background: transparent;
     border: none;

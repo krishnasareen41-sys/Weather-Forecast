@@ -1,13 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session, redirect, url_for
 from flask_cors import CORS
 import requests
 import os
 from dotenv import load_dotenv
+from bcrypt import checkpw, hashpw, gensalt
+from db import get_db_connection
 
 # Load environment variables from a gitignored .env file
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = 'replace_this_with_a_random_secret_key'
 CORS(app)  # Enable CORS so frontend (e.g. GitHub Pages) can communicate securely
 
 # Retrieve OpenWeatherMap API Key securely from server environment
@@ -82,14 +85,38 @@ def login():
     data = request.get_json()
     if not data or not data.get('email') or not data.get('password'):
         return jsonify({'success': False, 'message': 'Missing credentials'}), 400
-    return jsonify({'success': True, 'message': 'Login successful'})
+    email = data['email']
+    password = data['password']
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    conn.close()
+    if user is None:
+        return jsonify({'success': False, 'message': 'Incorrect email or password'}), 401
+    # Verify password using bcrypt
+    if not checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+        return jsonify({'success': False, 'message': 'Incorrect email or password'}), 401
+    session['user_id'] = user['id']
+    return jsonify({'success': True, 'message': 'Login successful'}), 200
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
     data = request.get_json()
     if not data or not data.get('name') or not data.get('email') or not data.get('password'):
         return jsonify({'success': False, 'message': 'Missing fields'}), 400
-    return jsonify({'success': True, 'message': 'Signup successful'})
+    name = data['name']
+    email = data['email']
+    password = data['password']
+    # Hash the password using bcrypt
+    password_hash = hashpw(password.encode('utf-8'), gensalt()).decode('utf-8')
+    conn = get_db_connection()
+    try:
+        conn.execute('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', (name, email, password_hash))
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        return jsonify({'success': False, 'message': f'Signup failed: {str(e)}'}), 500
+    conn.close()
+    return jsonify({'success': True, 'message': 'Signup successful'}), 201
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
