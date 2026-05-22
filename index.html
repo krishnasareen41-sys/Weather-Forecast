@@ -349,12 +349,9 @@
                     }
                 }
             } catch (error) {
-                // Fallback for purely static frontend testing - allow login bypass if server is not active
-                console.warn('Backend server not connected. Bypassing auth check for static preview...');
-                sessionStorage.setItem('auth_success', 'true');
-                sessionStorage.setItem('user_email', email);
-                // Direct to the home page to simulate a successful login
-                window.location.href = 'home.html';
+                errorDiv.textContent = 'Unable to connect to authentication server. Please try again later.';
+                errorDiv.style.display = 'block';
+                setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
             }
         });
 
@@ -392,12 +389,8 @@
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {
-                // Fallback for purely static frontend testing - allow account creation simulation
-                console.warn('Backend server not connected. Simulating signup success...');
-                sessionStorage.setItem('auth_success', 'true');
-                sessionStorage.setItem('user_email', email);
-                // Direct to the home page to simulate a successful login after sign‑up
-                window.location.href = 'home.html';
+                errorDiv.textContent = 'Unable to connect to authentication server. Please try again later.';
+                errorDiv.style.display = 'block';
             }
         });
     </script>

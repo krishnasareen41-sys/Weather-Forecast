@@ -383,8 +383,14 @@ function calculateOutdoorScore(weather, temp, windSpeed, rainProb) {
     return Math.max(0, Math.min(100, score));
 }
 
-function generateSuggestions(weather, temp, humidity, windSpeed, isDay, aqi) {
+const beachCities = ['miami', 'honolulu', 'malibu', 'cancun', 'sydney', 'goa', 'phuket', 'bali', 'maldives', 'fiji', 'boracay', 'ibiza', 'santorini', 'mykonos', 'rio', 'barcelona', 'los angeles', 'san diego', 'nice', 'dubai', 'pattaya', 'cancún', 'hawaii', 'philippines', 'bahamas', 'seychelles', 'mauritius', 'gold coast'];
+const mountainCities = ['aspen', 'chamonix', 'banff', 'zermatt', 'whistler', 'innsbruck', 'niseko', 'queenstown', 'bariloche', 'denver', 'boulder', 'salt lake city', 'manali', 'shimla', 'gulmarg', 'leh'];
+
+function generateSuggestions(weather, temp, humidity, windSpeed, isDay, aqi, locationName = '') {
     const tempC = state.unit === 'metric' ? temp : (temp - 32) * 5/9;
+    const locLower = locationName.toLowerCase();
+    const isBeach = beachCities.some(city => locLower.includes(city));
+    const isMountain = mountainCities.some(city => locLower.includes(city));
     
     let clothing = '';
     if (tempC <= 0) clothing = '🧥 Heavy winter coat, thermal layers, scarf, gloves, wool socks';
@@ -401,7 +407,7 @@ function generateSuggestions(weather, temp, humidity, windSpeed, isDay, aqi) {
     } else if (weather === 'Thunderstorm') {
         accessory = '⚡ Stay indoors, unplug electronics, avoid open areas, keep flashlight ready';
     } else if (weather === 'Clear' && tempC > 25) {
-        accessory = '🕶️ Sunglasses, sunscreen (SPF 30+), hat, cooling towel';
+        accessory = isBeach ? '🕶️ Sunglasses, sunscreen (SPF 30+), beach towel, hat' : '🕶️ Sunglasses, sunscreen (SPF 30+), hat, cooling towel';
     } else if (windSpeed > 10) {
         accessory = '🧣 Windbreaker, secure hat, scarf, protective eyewear';
     } else {
@@ -412,11 +418,11 @@ function generateSuggestions(weather, temp, humidity, windSpeed, isDay, aqi) {
     if (weather.includes('Rain') || weather === 'Drizzle' || weather === 'Thunderstorm') {
         activity = '🏠 Indoor activities: movies, reading, museums, cooking, gaming';
     } else if (weather === 'Snow') {
-        activity = '⛄ Outdoor: snowman building, skiing, sledding. Indoor: hot chocolate, board games';
+        activity = isMountain ? '⛄ Outdoor: skiing, snowboarding, sledding. Indoor: hot chocolate, fireside relaxing' : '⛄ Outdoor: snowman building, winter walks. Indoor: hot chocolate, board games';
     } else if (weather === 'Clear' && tempC >= 15 && tempC <= 28) {
-        activity = '🚶 Perfect for hiking, picnics, cycling, outdoor sports, photography';
+        activity = isMountain ? '🚶 Great for mountain hiking, scenic drives, photography' : '🚶 Perfect for city walks, picnics, cycling, outdoor sports';
     } else if (tempC > 30) {
-        activity = '🏊 Beach, swimming, indoor activities during peak sun hours, stay hydrated';
+        activity = isBeach ? '🏊 Perfect beach weather! Swimming, sunbathing, stay hydrated' : '🏊 Indoor pool, water parks, indoor activities during peak sun hours, stay hydrated';
     } else if (weather === 'Clouds') {
         activity = '🚴 Great for long walks, outdoor exercises, sightseeing, photography';
     } else {
@@ -758,8 +764,8 @@ function updateSunProgress(sunrise, sunset) {
     if (progressBar) progressBar.style.width = `${percent}%`;
 }
 
-function updateSuggestions(weather, temp, humidity, windSpeed, isDay, aqi) {
-    const suggestions = generateSuggestions(weather, temp, humidity, windSpeed, isDay, aqi);
+function updateSuggestions(weather, temp, humidity, windSpeed, isDay, aqi, locationName) {
+    const suggestions = generateSuggestions(weather, temp, humidity, windSpeed, isDay, aqi, locationName);
     const clothingElem = document.getElementById('clothing-suggestion');
     const accessoryElem = document.getElementById('accessory-suggestion');
     const activityElem = document.getElementById('activity-suggestion');
@@ -1006,7 +1012,7 @@ async function fetchAllWeatherData(lat, lon, locationName) {
         if (outdoorElem) outdoorElem.innerHTML = `${outdoorScore}/100 ${outdoorScore > 70 ? '🏆 Great!' : (outdoorScore > 40 ? '⚠️ Caution' : '🚫 Avoid')}`;
         
         // Generate suggestions
-        updateSuggestions(current.weather[0].main, current.main.temp, current.main.humidity, current.wind.speed, isDay, aqiVal);
+        updateSuggestions(current.weather[0].main, current.main.temp, current.main.humidity, current.wind.speed, isDay, aqiVal, locationName);
         
         // Background
         updateBackgroundCanvas(current.weather[0].main, isDay, current.clouds.all);

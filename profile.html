@@ -59,22 +59,26 @@
 </head>
 <body>
     <div class="profile-card" id="profile-card">
-        <h1>Welcome</h1>
-        <p id="email-display">Loading…</p>
-        <button class="btn" id="logout-btn">Log Out</button>
-    </div>
-    <script>
-        // Auth guard – redirect to login if no email stored
-        const email = sessionStorage.getItem('user_email');
-        if (!email) {
-            window.location.href = 'index.html';
-        } else {
-            document.getElementById('email-display').textContent = email;
-        }
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            sessionStorage.clear();
-            window.location.href = 'index.html';
-        });
-    </script>
+    <h1>Welcome</h1>
+    <p id="email-display">Loading…</p>
+    <button class="btn" id="back-btn">← Back</button>
+    <button class="btn" id="logout-btn">Log Out</button>
+</div>
+<script>
+    // Auth guard – redirect to login if no email stored
+    const email = sessionStorage.getItem('user_email');
+    if (!email) {
+        window.location.href = 'index.html';
+    } else {
+        document.getElementById('email-display').textContent = email;
+    }
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+    });
+    document.getElementById('back-btn').addEventListener('click', () => {
+    window.history.back();
+});
+</script>
 </body>
 </html>
